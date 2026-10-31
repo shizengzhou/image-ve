@@ -2,6 +2,8 @@ name: Release
 
 on:
   push:
+    branches:
+      - main
     tags:
       - 'v*'
   workflow_dispatch:
@@ -30,7 +32,10 @@ jobs:
               dist/*.exe
               dist/*.exe.blockmap
           - name: macOS
-            os: macos-latest
+            # macos-latest now ships Xcode 26 / Apple clang 21, which the
+            # Conan version bundled with electron-magickwand does not know.
+            # macos-14 keeps an older clang that is supported.
+            os: macos-14
             args: --mac
             artifact: macos
             files: |
@@ -56,6 +61,25 @@ jobs:
         with:
           node-version: 22
           cache: npm
+
+      - name: Setup MSVC
+        if: runner.os == 'Windows'
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x64
+
+      - name: Remove non-MSVC compilers from PATH
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          # electron-magickwand builds ImageMagick through Conan. The runner
+          # ships MinGW / Strawberry GCC in PATH, which makes Conan detect gcc
+          # instead of MSVC and fail on compiler.runtime. Drop every PATH entry
+          # that exposes gcc/clang, keeping the MSVC toolchain set up above.
+          $filtered = ($env:PATH -split ';' | Where-Object {
+            $_ -and -not (Test-Path (Join-Path $_ 'gcc.exe')) -and -not (Test-Path (Join-Path $_ 'clang.exe'))
+          }) -join ';'
+          "PATH=$filtered" | Out-File -FilePath $env:GITHUB_ENV -Append
 
       - name: Install dependencies
         run: npm ci
