@@ -76,9 +76,17 @@ jobs:
           # relying on Conan's compiler auto-detection (which picks up MinGW
           # GCC on the runner), pin the default profile to the MSVC toolchain.
           $vswhere = Join-Path ${env:ProgramFiles(x86)} 'Microsoft Visual Studio\Installer\vswhere.exe'
-          $vsVersion = & $vswhere -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationVersion
+          # Prefer VS 2022 (17.x); Conan's MesonToolchain knows that IDE version.
+          # Fall back to the newest installation if 17.x is not present.
+          $vsVersion = & $vswhere -latest -version '[17.0,18.0)' -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationVersion
+          $vsInstallPath = & $vswhere -latest -version '[17.0,18.0)' -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath
+          if (-not $vsVersion) {
+            $vsVersion = & $vswhere -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationVersion
+            $vsInstallPath = & $vswhere -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath
+          }
           if (-not $vsVersion) { throw 'Visual Studio C++ toolchain not found' }
-          $msvcVersion = switch ([int]($vsVersion.Split('.')[0])) {
+          $vsMajor = [int]($vsVersion.Split('.')[0])
+          $msvcVersion = switch ($vsMajor) {
             14 { '190' }
             15 { '191' }
             16 { '192' }
@@ -98,6 +106,9 @@ jobs:
             'compiler.runtime=static'
             'compiler.runtime_type=Release'
             'compiler.cppstd=20'
+            '[conf]'
+            "tools.microsoft.msbuild:vs_version=$vsMajor"
+            "tools.microsoft.msbuild:installation_path=$($vsInstallPath -replace '\\', '/')"
           )
           $profileFile = Join-Path $profileDir 'default'
           [System.IO.File]::WriteAllText($profileFile, ($profileLines -join "`r`n") + "`r`n")
