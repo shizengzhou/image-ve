@@ -36,5 +36,11 @@ export default defineConfig(
       ]
     }
   },
+  {
+    files: ['src/renderer/src/composables/**/*.ts'],
+    rules: {
+      '@typescript-eslint/explicit-function-return-type': 'off'
+    }
+  },
   eslintConfigPrettier
 );

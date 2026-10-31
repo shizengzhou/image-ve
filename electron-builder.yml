@@ -1,4 +1,4 @@
-appId: com.electron.app
+appId: com.shizeng.ImageVE
 productName: image-ve
 directories:
   buildResources: build
@@ -9,15 +9,91 @@ files:
   - '!{.eslintcache,eslint.config.mjs,.prettierignore,.prettierrc.yaml,dev-app-update.yml,CHANGELOG.md,README.md}'
   - '!{.env,.env.*,.npmrc,pnpm-lock.yaml}'
   - '!{tsconfig.json,tsconfig.node.json,tsconfig.web.json}'
+  - '!node_modules/electron-magickwand/build/Release/obj/**'
+  - '!node_modules/electron-magickwand/build/Release/*.iobj'
+  - '!node_modules/electron-magickwand/build/Release/*.ipdb'
+  - '!node_modules/electron-magickwand/build/Release/*.pdb'
+  - '!node_modules/electron-magickwand/build/Release/*.exp'
+  - '!node_modules/electron-magickwand/build/Release/*.lib'
+  - '!node_modules/electron-magickwand/lib/**'
+  - '!node_modules/electron-magickwand/bin/**'
+  - '!node_modules/electron-magickwand/xpacks/**'
+  - '!node_modules/electron-magickwand/{example,test,scripts,src,swig,preconf,profiles}/**'
 asarUnpack:
   - resources/**
+  - node_modules/electron-magickwand/**
+  - node_modules/exiftool-vendored/**
+  - node_modules/exiftool-vendored.exe/**
+  - node_modules/exiftool-vendored.pl/**
+  - node_modules/xxhash-addon/**
+  - node_modules/@napi-rs/**
+  - node_modules/pdfjs-dist/**
+fileAssociations:
+  - ext:
+      - jpg
+      - jpeg
+      - png
+      - gif
+      - webp
+      - bmp
+      - svg
+      - tif
+      - tiff
+      - ico
+      - icns
+      - heic
+      - heif
+      - avif
+      - psd
+      - ai
+      - 3fr
+      - arw
+      - cr2
+      - cr3
+      - crw
+      - dcr
+      - dng
+      - erf
+      - kdc
+      - mef
+      - mos
+      - mrw
+      - nef
+      - nrw
+      - orf
+      - pef
+      - raf
+      - raw
+      - rw2
+      - rwl
+      - sr2
+      - srf
+      - srw
+      - x3f
+    name: Image
+    description: Image file
+    role: Viewer
 win:
   executableName: image-ve
 nsis:
   artifactName: ${name}-${version}-setup.${ext}
   shortcutName: ${productName}
   uninstallDisplayName: ${productName}
-  createDesktopShortcut: always
+  createDesktopShortcut: true
+  oneClick: false
+  allowToChangeInstallationDirectory: true
+  displayLanguageSelector: true
+  multiLanguageInstaller: true
+  installerLanguages:
+    - en_US
+    - de_DE
+    - fr_FR
+    - it_IT
+    - ja_JP
+    - ko_KR
+    - ru_RU
+    - zh_CN
+    - zh_TW
 mac:
   entitlementsInherit: build/entitlements.mac.plist
   extendInfo:

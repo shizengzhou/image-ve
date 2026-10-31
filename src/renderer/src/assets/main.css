@@ -1,171 +1,106 @@
-@import './base.css';
-
-body {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-  background-image: url('./wavy-lines.svg');
-  background-size: cover;
-  user-select: none;
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
 }
 
-code {
-  font-weight: 600;
-  padding: 3px 5px;
-  border-radius: 2px;
-  background-color: var(--color-background-mute);
+:root {
   font-family:
-    ui-monospace,
-    SFMono-Regular,
-    SF Mono,
-    Menlo,
-    Consolas,
-    Liberation Mono,
-    monospace;
-  font-size: 85%;
+    -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  color-scheme: dark;
+  --app-bg: #20262d;
+  --app-text: #e7e9ed;
+  --app-text-muted: rgba(231, 233, 237, 0.8);
+  --app-text-subtle: rgba(231, 233, 237, 0.6);
+  --panel-bg: rgba(26, 32, 38, 0.96);
+  --panel-bg-transparent: rgba(26, 32, 38, 0.85);
+  --panel-border: rgba(255, 255, 255, 0.08);
+  --scrollbar-thumb: rgba(231, 233, 237, 0.35);
+  --scrollbar-thumb-hover: rgba(231, 233, 237, 0.5);
+  --loading-mask-bg: rgba(20, 24, 29, 0.4);
+  --button-secondary-bg: rgba(255, 255, 255, 0.06);
+  --button-secondary-border: rgba(255, 255, 255, 0.1);
+  --button-secondary-hover: rgba(255, 255, 255, 0.12);
+  --option-bg: rgba(255, 255, 255, 0.06);
+  --option-active-bg: rgba(255, 255, 255, 0.16);
+  --option-active-text: #ffffff;
+  --option-active-border: rgba(255, 255, 255, 0.3);
+  --checker-bg: #2a2f35;
+  --checker-square: rgba(255, 255, 255, 0.08);
+  --sidebar-bg: #1c2228;
+  --sidebar-border: rgba(255, 255, 255, 0.06);
+  --thumbnail-active: #006cf5;
+}
+
+:root[data-theme='light'] {
+  color-scheme: light;
+  --app-bg: #f5f7fa;
+  --app-text: #1f2933;
+  --app-text-muted: rgba(31, 41, 51, 0.75);
+  --app-text-subtle: rgba(31, 41, 51, 0.6);
+  --panel-bg: #ffffff;
+  --panel-bg-transparent: rgba(255, 255, 255, 0.85);
+  --panel-border: rgba(15, 23, 42, 0.12);
+  --scrollbar-thumb: rgba(15, 23, 42, 0.2);
+  --scrollbar-thumb-hover: rgba(15, 23, 42, 0.35);
+  --loading-mask-bg: rgba(241, 245, 249, 0.7);
+  --button-secondary-bg: rgba(15, 23, 42, 0.08);
+  --button-secondary-border: rgba(15, 23, 42, 0.16);
+  --button-secondary-hover: rgba(15, 23, 42, 0.12);
+  --option-bg: rgba(15, 23, 42, 0.08);
+  --option-active-bg: rgba(15, 23, 42, 0.18);
+  --option-active-text: #0f172a;
+  --option-active-border: rgba(15, 23, 42, 0.3);
+  --checker-bg: #e5e7eb;
+  --checker-square: rgba(15, 23, 42, 0.12);
+  --sidebar-bg: #ffffff;
+  --sidebar-border: rgba(15, 23, 42, 0.1);
+  --thumbnail-active: #2563eb;
+}
+
+html,
+body {
+  width: 100%;
+  height: 100%;
+  overscroll-behavior: none;
 }
 
 #app {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-direction: column;
-  margin-bottom: 80px;
+  width: 100vw;
+  height: 100vh;
+  margin: 0;
+  padding: 0;
+  font-weight: normal;
 }
 
-.logo {
-  margin-bottom: 20px;
-  -webkit-user-drag: none;
-  height: 128px;
-  width: 128px;
-  will-change: filter;
-  transition: filter 300ms;
+body {
+  margin: 0;
+  background: var(--app-bg);
+  color: var(--app-text);
 }
 
-.logo:hover {
-  filter: drop-shadow(0 0 1.2em #6988e6aa);
+.thumbnail-wrapper {
+  padding: 2px;
 }
 
-.creator {
-  font-size: 14px;
-  line-height: 16px;
-  color: var(--ev-c-text-2);
-  font-weight: 600;
-  margin-bottom: 10px;
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
 }
 
-.text {
-  font-size: 28px;
-  color: var(--ev-c-text-1);
-  font-weight: 700;
-  line-height: 32px;
-  text-align: center;
-  margin: 0 10px;
-  padding: 16px 0;
+::-webkit-scrollbar-track {
+  background-color: transparent;
 }
 
-.tip {
-  font-size: 16px;
-  line-height: 24px;
-  color: var(--ev-c-text-2);
-  font-weight: 600;
+::-webkit-scrollbar-thumb {
+  background-color: var(--scrollbar-thumb);
+  border-radius: 4px;
 }
 
-.vue {
-  background: -webkit-linear-gradient(315deg, #42d392 25%, #647eff);
-  background-clip: text;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  font-weight: 700;
+::-webkit-scrollbar-thumb:hover {
+  background-color: var(--scrollbar-thumb-hover);
 }
 
-.ts {
-  background: -webkit-linear-gradient(315deg, #3178c6 45%, #f0dc4e);
-  background-clip: text;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  font-weight: 700;
-}
-
-.actions {
-  display: flex;
-  padding-top: 32px;
-  margin: -6px;
-  flex-wrap: wrap;
-  justify-content: flex-start;
-}
-
-.action {
-  flex-shrink: 0;
-  padding: 6px;
-}
-
-.action a {
-  cursor: pointer;
-  text-decoration: none;
-  display: inline-block;
-  border: 1px solid transparent;
-  text-align: center;
-  font-weight: 600;
-  white-space: nowrap;
-  border-radius: 20px;
-  padding: 0 20px;
-  line-height: 38px;
-  font-size: 14px;
-  border-color: var(--ev-button-alt-border);
-  color: var(--ev-button-alt-text);
-  background-color: var(--ev-button-alt-bg);
-}
-
-.action a:hover {
-  border-color: var(--ev-button-alt-hover-border);
-  color: var(--ev-button-alt-hover-text);
-  background-color: var(--ev-button-alt-hover-bg);
-}
-
-.versions {
-  position: absolute;
-  bottom: 30px;
-  margin: 0 auto;
-  padding: 15px 0;
-  font-family: 'Menlo', 'Lucida Console', monospace;
-  display: inline-flex;
-  overflow: hidden;
-  align-items: center;
-  border-radius: 22px;
-  background-color: #202127;
-  backdrop-filter: blur(24px);
-}
-
-.versions li {
-  display: block;
-  float: left;
-  border-right: 1px solid var(--ev-c-gray-1);
-  padding: 0 20px;
-  font-size: 14px;
-  line-height: 14px;
-  opacity: 0.8;
-  &:last-child {
-    border: none;
-  }
-}
-
-@media (max-width: 720px) {
-  .text {
-    font-size: 20px;
-  }
-}
-
-@media (max-width: 620px) {
-  .versions {
-    display: none;
-  }
-}
-
-@media (max-width: 350px) {
-  .tip,
-  .actions {
-    display: none;
-  }
+button:focus-visible {
+  outline: none;
 }
