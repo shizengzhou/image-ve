@@ -32,10 +32,10 @@ jobs:
               dist/*.exe
               dist/*.exe.blockmap
           - name: macOS
-            # macos-latest now ships Xcode 26 / Apple clang 21, which the
-            # Conan version bundled with electron-magickwand does not know.
-            # macos-14 keeps an older clang that is supported.
-            os: macos-14
+            # macos-latest ships Xcode 26 / Apple clang 21, which the Conan
+            # version bundled with electron-magickwand does not know.
+            # macos-15 keeps Xcode 16.x (clang <= 17), which is supported.
+            os: macos-15
             args: --mac
             artifact: macos
             files: |
@@ -68,18 +68,51 @@ jobs:
         with:
           arch: x64
 
-      - name: Remove non-MSVC compilers from PATH
+      - name: Write Conan MSVC profile
         if: runner.os == 'Windows'
         shell: pwsh
         run: |
-          # electron-magickwand builds ImageMagick through Conan. The runner
-          # ships MinGW / Strawberry GCC in PATH, which makes Conan detect gcc
-          # instead of MSVC and fail on compiler.runtime. Drop every PATH entry
-          # that exposes gcc/clang, keeping the MSVC toolchain set up above.
-          $filtered = ($env:PATH -split ';' | Where-Object {
-            $_ -and -not (Test-Path (Join-Path $_ 'gcc.exe')) -and -not (Test-Path (Join-Path $_ 'clang.exe'))
-          }) -join ';'
-          "PATH=$filtered" | Out-File -FilePath $env:GITHUB_ENV -Append
+          # electron-magickwand builds ImageMagick through Conan. Instead of
+          # relying on Conan's compiler auto-detection (which picks up MinGW
+          # GCC on the runner), pin the default profile to the MSVC toolchain.
+          $vswhere = Join-Path ${env:ProgramFiles(x86)} 'Microsoft Visual Studio\Installer\vswhere.exe'
+          $vsVersion = & $vswhere -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationVersion
+          if (-not $vsVersion) { throw 'Visual Studio C++ toolchain not found' }
+          $msvcVersion = switch ([int]($vsVersion.Split('.')[0])) {
+            14 { '190' }
+            15 { '191' }
+            16 { '192' }
+            17 { '193' }
+            18 { '194' }
+            default { '193' }
+          }
+          $profileDir = Join-Path $env:LOCALAPPDATA 'hadron\profiles'
+          New-Item -ItemType Directory -Force -Path $profileDir | Out-Null
+          $profileLines = @(
+            '[settings]'
+            'os=Windows'
+            'arch=x86_64'
+            'build_type=Release'
+            'compiler=msvc'
+            "compiler.version=$msvcVersion"
+            'compiler.runtime=static'
+            'compiler.runtime_type=Release'
+            'compiler.cppstd=20'
+          )
+          $profileFile = Join-Path $profileDir 'default'
+          [System.IO.File]::WriteAllText($profileFile, ($profileLines -join "`r`n") + "`r`n")
+          Get-Content $profileFile
+
+      - name: Use Conan-compatible Xcode
+        if: runner.os == 'macOS'
+        run: |
+          # Prefer an Xcode 16.x toolchain (Apple clang <= 17). Fall back to the
+          # runner default if it is not installed.
+          XCODE_APP=$(ls -d /Applications/Xcode_16*.app 2>/dev/null | sort -V | tail -n 1 || true)
+          if [ -n "$XCODE_APP" ]; then
+            sudo xcode-select -s "$XCODE_APP"
+          fi
+          xcodebuild -version
 
       - name: Install dependencies
         run: npm ci
