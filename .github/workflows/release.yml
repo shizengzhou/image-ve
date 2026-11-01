@@ -17,7 +17,7 @@ jobs:
   build:
     name: Build ${{ matrix.name }}
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 90
+    timeout-minutes: 120
     strategy:
       fail-fast: false
       matrix:
@@ -126,6 +126,12 @@ jobs:
           xcodebuild -version
 
       - name: Install dependencies
+        # electron-magickwand 的 conanfile 在 conan=False（默认）时不会添加任何
+        # 委托依赖，ImageMagick 也就不带 LibRaw，RAW 会退回不存在的 ufraw-batch。
+        # 这两个 npm 配置会由 hadron 转成 conan 选项，必须显式打开。
+        env:
+          npm_config_build_from_source: 'true'
+          npm_config_enable_conan: 'true'
         run: npm ci
 
       - name: Rebuild magickwand for Electron
