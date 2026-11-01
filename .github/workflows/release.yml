@@ -128,10 +128,13 @@ jobs:
       - name: Install dependencies
         # electron-magickwand 的 conanfile 在 conan=False（默认）时不会添加任何
         # 委托依赖，ImageMagick 也就不带 LibRaw，RAW 会退回不存在的 ufraw-batch。
-        # 这两个 npm 配置会由 hadron 转成 conan 选项，必须显式打开。
+        # 这些 npm 配置会由 hadron 转成 conan 选项，必须显式打开。
+        # xml（libxml2）会连带构建 libiconv，其 autotools 配方在 windows runner 上
+        # 找不到 vcvars 14.3 工具集必然失败；SVG 由 Chromium 直接渲染，所以关掉它。
         env:
           npm_config_build_from_source: 'true'
           npm_config_enable_conan: 'true'
+          npm_config_disable_xml: 'true'
         run: npm ci
 
       - name: Rebuild magickwand for Electron
