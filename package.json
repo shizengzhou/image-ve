@@ -1,11 +1,12 @@
 {
   "name": "ImageVE",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "A clean image viewer",
   "main": "./out/main/index.js",
   "author": "shizeng",
   "homepage": "https://electron-vite.org",
   "scripts": {
+    "postinstall": "node scripts/ensure-magickwand.mjs",
     "format": "prettier --write .",
     "lint": "eslint --cache .",
     "typecheck:node": "tsc --noEmit -p tsconfig.node.json --composite false",
