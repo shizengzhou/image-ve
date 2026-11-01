@@ -11,6 +11,7 @@ import { extractEmbeddedPreview } from './exiftool';
 import { runMagick } from './magick';
 import { renderIcnsThumbnail } from './icns';
 import { renderPdfFirstPage } from './pdf';
+import { log } from './logger';
 
 // Formats Chromium can display without ImageMagick delegates.
 const browserRenderableExtensions = new Set([
@@ -103,6 +104,29 @@ const createThumbnail = async (path: string, maxSize: number): Promise<Buffer> =
 };
 
 export const getThumbnail = async (path: string, maxSize: number): Promise<Buffer> => {
+  const extension = extname(path).slice(1).toLowerCase();
+  const startedAt = Date.now();
+  const usesNativeDecoder = extension !== 'svg' && !browserRenderableExtensions.has(extension);
+
+  // 需要走原生解码的格式先记开始日志，卡死时能看出是谁开的口子。
+  if (usesNativeDecoder) {
+    log('info', `thumbnail start ${extension} ${maxSize}px`, path);
+  }
+
+  try {
+    const thumbnail = await getThumbnailInternal(path, maxSize);
+    const elapsed = Date.now() - startedAt;
+    if (usesNativeDecoder || elapsed >= 500) {
+      log('info', `thumbnail done ${extension} ${thumbnail.length}B ${elapsed}ms`, path);
+    }
+    return thumbnail;
+  } catch (error) {
+    log('error', `thumbnail failed ${extension} ${Date.now() - startedAt}ms`, { path, error });
+    throw error;
+  }
+};
+
+const getThumbnailInternal = async (path: string, maxSize: number): Promise<Buffer> => {
   const extension = extname(path).toLowerCase();
 
   if (extension === '.svg') {

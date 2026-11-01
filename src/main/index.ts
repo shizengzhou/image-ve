@@ -31,6 +31,7 @@ import { rebuildAppMenu } from './menu';
 import { listImageFiles, showOpenDirectoryDialog, showOpenFileDialog } from './open';
 import { addRecentItem, clearRecentItems, getRecentItems, removeRecentItem } from './recentItems';
 import { updateWindowsJumpList } from './jumpList';
+import { getLogFilePath, log } from './logger';
 import { getSettings, saveSettings } from './settings';
 import { setTheme } from './theme';
 import {
@@ -104,6 +105,7 @@ const setupWindow = (window: BrowserWindow): void => {
 };
 
 const openMainWindow = (path?: string, isDirectory = false): BrowserWindow => {
+  log('info', 'open main window', { path: path ?? null, isDirectory });
   const window = createMainWindow(path, isDirectory);
   setupWindow(window);
   return window;
@@ -270,6 +272,23 @@ const registerIpcHandlers = (): void => {
 
 const init = async (): Promise<void> => {
   electronApp.setAppUserModelId('com.shizeng.ImageVE');
+
+  log('info', 'app started', {
+    version: app.getVersion(),
+    platform: `${process.platform}-${process.arch}`,
+    electron: process.versions.electron,
+    chrome: process.versions.chrome,
+    node: process.versions.node,
+    userData: app.getPath('userData'),
+    logFile: getLogFilePath()
+  });
+
+  app.on('render-process-gone', (_event, _webContents, details) => {
+    log('error', 'render process gone', details);
+  });
+  app.on('child-process-gone', (_event, details) => {
+    log('error', 'child process gone', details);
+  });
 
   app.on('browser-window-created', (_, window) => {
     optimizer.watchWindowShortcuts(window);

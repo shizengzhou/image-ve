@@ -8,6 +8,7 @@ import type { ImageSize } from '@shared/types';
 import { runMagick } from './magick';
 import { readIcnsImage } from './icns';
 import { renderPdfFirstPage } from './pdf';
+import { log } from './logger';
 
 const rawExtensions = new Set(RAW_EXTENSIONS);
 
@@ -60,7 +61,28 @@ const convertToJpeg = async (path: string): Promise<Buffer> => {
 
 export const decodeImageBytes = async (path: string): Promise<Buffer> => {
   const extension = extname(path).slice(1).toLowerCase();
+  const startedAt = Date.now();
+  // 先记一条开始日志：如果原生解码卡死，日志里会只有 start 没有 done。
+  log('info', `decode start ${extension || '(none)'}`, path);
 
+  try {
+    const bytes = await decodeImageBytesInternal(path, extension);
+    log(
+      'info',
+      `decode done ${extension || '(none)'} ${bytes.length}B ${Date.now() - startedAt}ms`,
+      path
+    );
+    return bytes;
+  } catch (error) {
+    log('error', `decode failed ${extension || '(none)'} ${Date.now() - startedAt}ms`, {
+      path,
+      error
+    });
+    throw error;
+  }
+};
+
+const decodeImageBytesInternal = async (path: string, extension: string): Promise<Buffer> => {
   if (directExtensions.has(extension)) {
     return fs.promises.readFile(path);
   }
@@ -102,14 +124,24 @@ export const decodeImageBytes = async (path: string): Promise<Buffer> => {
 };
 
 export const getImageSize = async (path: string): Promise<ImageSize> => {
-  return runMagick(async () => {
-    const image = new Magick.Image();
-    await image.pingAsync(path);
-    await image.autoOrientAsync();
+  const startedAt = Date.now();
+  log('info', 'ping start', path);
 
-    return {
-      width: image.size().width(),
-      height: image.size().height()
-    };
-  });
+  try {
+    const size = await runMagick(async () => {
+      const image = new Magick.Image();
+      await image.pingAsync(path);
+      await image.autoOrientAsync();
+
+      return {
+        width: image.size().width(),
+        height: image.size().height()
+      };
+    });
+    log('info', `ping done ${size.width}x${size.height} ${Date.now() - startedAt}ms`, path);
+    return size;
+  } catch (error) {
+    log('error', `ping failed ${Date.now() - startedAt}ms`, { path, error });
+    throw error;
+  }
 };
