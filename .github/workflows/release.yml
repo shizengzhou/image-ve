@@ -23,7 +23,9 @@ jobs:
       matrix:
         include:
           - name: Windows
-            os: windows-latest
+            # windows-latest 可能已切到 VS2026（v180 工具集），而 electron-magickwand
+            # 的 binding.gyp 固定要求 v143，因此这里固定在 VS2022 镜像上。
+            os: windows-2022
             args: --win nsis
             artifact: windows
             files: |
@@ -125,6 +127,10 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
+
+      - name: Rebuild magickwand for Electron
+        if: runner.os == 'Windows'
+        run: npm run rebuild:native
 
       - name: Build renderer and main process
         run: npm run build
