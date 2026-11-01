@@ -132,6 +132,9 @@ jobs:
         if: runner.os == 'Windows'
         run: npm run rebuild:native
 
+      - name: Verify native RAW support
+        run: node scripts/check-native-raw.mjs
+
       - name: Build renderer and main process
         run: npm run build
 

@@ -7,7 +7,7 @@
   "homepage": "https://electron-vite.org",
   "scripts": {
     "postinstall": "node scripts/ensure-magickwand.mjs",
-    "rebuild:native": "node scripts/prepare-native.mjs && electron-rebuild -f -w electron-magickwand",
+    "rebuild:native": "node scripts/prepare-native.mjs && electron-rebuild -f -w electron-magickwand && node scripts/check-native-raw.mjs",
     "format": "prettier --write .",
     "lint": "eslint --cache .",
     "typecheck:node": "tsc --noEmit -p tsconfig.node.json --composite false",
