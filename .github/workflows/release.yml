@@ -129,13 +129,14 @@ jobs:
         # electron-magickwand 的 conanfile 在 conan=False（默认）时不会添加任何
         # 委托依赖，ImageMagick 也就不带 LibRaw，RAW 会退回不存在的 ufraw-batch。
         # 这些 npm 配置会由 hadron 转成 conan 选项，必须显式打开。
-        # 同时关掉应用用不到的委托：xml/cairo/display 会连带拉入 libxml2、fontconfig、
-        # libiconv 等 autotools 配方，在 windows runner 上找不到 vcvars 14.3 必然失败；
-        # SVG 走 Chromium、PDF/AI 走 pdfjs、EXR/JP2 本就不在支持列表里。
+        # 同时关掉应用用不到的委托：fonts 会拉入 harfbuzz/glib，glib 再依赖 libiconv，
+        # 而 libiconv 的 autotools 配方在 windows runner 上找不到 vcvars 14.3 必然失败；
+        # xml/cairo/display 同理，SVG 走 Chromium、PDF/AI 走 pdfjs，EXR/JP2 不在支持列表。
         env:
           npm_config_build_from_source: 'true'
           npm_config_enable_conan: 'true'
           npm_config_disable_xml: 'true'
+          npm_config_disable_fonts: 'true'
           npm_config_disable_cairo: 'true'
           npm_config_disable_display: 'true'
           npm_config_disable_exr: 'true'
