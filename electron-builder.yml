@@ -96,6 +96,9 @@ nsis:
     - zh_TW
 mac:
   entitlementsInherit: build/entitlements.mac.plist
+  # 没有 Developer ID 证书时改用 ad-hoc 签名，避免 arm64 上因缺少签名被判为“已损坏”。
+  # 注意：这不能替代公证，用户下载后仍需右键打开或清除 quarantine 属性。
+  identity: '-'
   extendInfo:
     - NSCameraUsageDescription: Application requests access to the device's camera.
     - NSMicrophoneUsageDescription: Application requests access to the device's microphone.
