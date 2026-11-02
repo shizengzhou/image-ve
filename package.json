@@ -1,6 +1,6 @@
 {
   "name": "ImageVE",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "A clean image viewer",
   "main": "./out/main/index.js",
   "author": "shizeng",
