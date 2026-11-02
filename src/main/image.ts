@@ -5,7 +5,6 @@ import { extname } from 'node:path';
 import { RAW_EXTENSIONS } from '@shared/constants';
 import type { ImageSize } from '@shared/types';
 
-import { runMagick } from './magick';
 import { readIcnsImage } from './icns';
 import { renderPdfFirstPage } from './pdf';
 import { log } from './logger';
@@ -47,16 +46,14 @@ const touchCache = (key: string, mtimeMs: number, bytes: Buffer): void => {
 };
 
 const convertToJpeg = async (path: string): Promise<Buffer> => {
-  return runMagick(async () => {
-    const image = new Magick.Image();
-    await image.readAsync(path);
-    await image.autoOrientAsync();
+  const image = new Magick.Image();
+  await image.readAsync(path);
+  await image.autoOrientAsync();
 
-    const blob = new Magick.Blob();
-    await image.writeAsync(blob, 'jpeg');
+  const blob = new Magick.Blob();
+  await image.writeAsync(blob, 'jpeg');
 
-    return Buffer.from(blob.data());
-  });
+  return Buffer.from(blob.data());
 };
 
 export const decodeImageBytes = async (path: string): Promise<Buffer> => {
@@ -128,16 +125,14 @@ export const getImageSize = async (path: string): Promise<ImageSize> => {
   log('info', 'ping start', path);
 
   try {
-    const size = await runMagick(async () => {
-      const image = new Magick.Image();
-      await image.pingAsync(path);
-      await image.autoOrientAsync();
+    const image = new Magick.Image();
+    await image.pingAsync(path);
+    await image.autoOrientAsync();
 
-      return {
-        width: image.size().width(),
-        height: image.size().height()
-      };
-    });
+    const size: ImageSize = {
+      width: image.size().width(),
+      height: image.size().height()
+    };
     log('info', `ping done ${size.width}x${size.height} ${Date.now() - startedAt}ms`, path);
     return size;
   } catch (error) {

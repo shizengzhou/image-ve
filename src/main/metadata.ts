@@ -4,8 +4,6 @@ import { extname } from 'node:path';
 
 import type { FileMetadata } from '@shared/types';
 
-import { runMagick } from './magick';
-
 const emptyMetadata = (): FileMetadata => ({
   size: 0,
   modified: null,
@@ -462,8 +460,7 @@ const readImageMetadataUnsafe = async (path: string): Promise<FileMetadata> => {
   };
 };
 
-const readImageMetadata = (path: string): Promise<FileMetadata> =>
-  runMagick(() => readImageMetadataUnsafe(path));
+const readImageMetadata = (path: string): Promise<FileMetadata> => readImageMetadataUnsafe(path);
 
 export const readFileMetadata = async (path: string): Promise<FileMetadata> => {
   const stat = await fs.promises.stat(path);

@@ -8,7 +8,6 @@ import { XXHash64 } from 'xxhash-addon';
 import type { CacheStats } from '@shared/types';
 
 import { extractEmbeddedPreview } from './exiftool';
-import { runMagick } from './magick';
 import { renderIcnsThumbnail } from './icns';
 import { renderPdfFirstPage } from './pdf';
 import { log } from './logger';
@@ -90,17 +89,15 @@ const createThumbnail = async (path: string, maxSize: number): Promise<Buffer> =
     }
   }
 
-  return runMagick(async () => {
-    const image = new Magick.Image();
-    await image.readAsync(path);
-    await image.autoOrientAsync();
-    await image.thumbnailAsync(`${maxSize}x${maxSize}`);
+  const image = new Magick.Image();
+  await image.readAsync(path);
+  await image.autoOrientAsync();
+  await image.thumbnailAsync(`${maxSize}x${maxSize}`);
 
-    const blob = new Magick.Blob();
-    await image.writeAsync(blob, 'jpeg');
+  const blob = new Magick.Blob();
+  await image.writeAsync(blob, 'jpeg');
 
-    return Buffer.from(blob.data());
-  });
+  return Buffer.from(blob.data());
 };
 
 export const getThumbnail = async (path: string, maxSize: number): Promise<Buffer> => {
